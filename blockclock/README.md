@@ -1,4 +1,4 @@
-# blocktime
+# blockclock
 
 Tiny C program that fetches the latest block, validates it (header, tx parsing, merkle root, PoW), and prints the block height and time. It also runs a built-in genesis self-test on every run.
 
