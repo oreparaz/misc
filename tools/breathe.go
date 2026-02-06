@@ -1,43 +1,49 @@
 package main
 
-import (
-	"flag"
-	"fmt"
-	"time"
-)
-
 // run as
 // go run breathe.go -duration 5 -width 8
 
-func p(x int, mm int) {
-	fmt.Printf("\033[0;0H[")
-	for i := 0; i < x; i++ {
-		fmt.Printf(" ")
-	}
-	fmt.Printf("*")
-	for i := x; i < mm; i++ {
-		fmt.Printf(" ")
-	}
-	fmt.Printf("]\n")
+import (
+	"flag"
+	"fmt"
+	"strings"
+	"time"
+)
+
+const (
+	clearScreen = "\033[2J"
+	moveCursor  = "\033[0;0H"
+	colorCyan   = "\033[36m"
+	colorReset  = "\033[0m"
+)
+
+func drawBar(pos, width int) {
+	bar := strings.Repeat(" ", pos) + "●" + strings.Repeat(" ", width-pos)
+	fmt.Printf("%s%s[%s%s%s]\n", moveCursor, colorCyan, bar, colorReset, colorCyan)
 }
 
-func do(L int, T int) {
-	waitPerSymbol := time.Duration(T * 1000 / L)
-	for i := 0; i < L; i++ {
-		p(i, L-1)
-		time.Sleep(waitPerSymbol * time.Millisecond)
+func breatheCycle(width, durationSec int) {
+	delay := time.Duration(durationSec*1000/width) * time.Millisecond
+
+	// Inhale
+	for i := 0; i < width; i++ {
+		drawBar(i, width-1)
+		time.Sleep(delay)
 	}
-	for i := L - 2; i > 0; i-- {
-		p(i, L-1)
-		time.Sleep(waitPerSymbol * time.Millisecond)
+	// Exhale
+	for i := width - 2; i > 0; i-- {
+		drawBar(i, width-1)
+		time.Sleep(delay)
 	}
 }
 
 func main() {
-	width := flag.Int("width", 11, "row width")
-	duration := flag.Int("duration", 8, "cycle duration (in s)")
+	width := flag.Int("width", 11, "bar width")
+	duration := flag.Int("duration", 8, "cycle duration in seconds")
 	flag.Parse()
+
+	fmt.Print(clearScreen)
 	for {
-		do(*width, *duration)
+		breatheCycle(*width, *duration)
 	}
 }
